@@ -26,7 +26,7 @@
   #weatherIcon{font-size:52px}
   #temp{font-size:38px;font-weight:700}
   #weatherText,#weatherPlace{color:var(--muted);font-size:16px}
-  .main{display:grid;grid-template-columns:1.8fr .85fr;gap:12px;min-height:0}
+  .main{display:grid;grid-template-columns:3fr 1fr;gap:12px;min-height:0}
   .calendarCard{padding:14px;display:grid;grid-template-rows:auto 1fr;min-height:0}
   .monthbar{display:flex;align-items:center;justify-content:space-between;padding:2px 6px 10px}
   #monthTitle{font-size:25px;font-weight:700}
@@ -37,11 +37,17 @@
     justify-content:center;text-align:center;padding:34px;color:var(--muted);font-size:18px}
   .emptyCalendar strong{display:block;color:var(--text);font-size:23px;margin-bottom:10px}
   .side{display:grid;grid-template-rows:auto 1fr;gap:12px;min-height:0}
-  .side.configured{grid-template-rows:1fr}
-  .side.configured .today{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
-  .side.configured .today h2{font-size:24px}
-  .side.configured .today .bigdate{font-size:72px}
-  .side.configured .today .weekday{font-size:20px}
+  .side.configured{grid-template-rows:auto 1fr}
+  .side.configured .today{display:block;text-align:left}
+  .side.configured .today h2{font-size:20px}
+  .side.configured .today .bigdate{font-size:58px}
+  .side.configured .today .weekday{font-size:18px}
+  .nextbox{padding:18px}
+  .nextbox h3{margin:0 0 12px;font-size:19px}
+  .nextbox .hint{color:var(--muted);font-size:14px;line-height:1.5}
+  .nextbox .line{height:1px;background:var(--line);margin:14px 0}
+  .nextbox .clockmini{font-size:30px;font-weight:700}
+  .nextbox .datemini{color:var(--muted);font-size:14px;margin-top:4px}
   .today{padding:18px}
   .today h2{margin:0 0 8px;font-size:21px}
   .today .bigdate{font-size:42px;font-weight:750;line-height:1}
@@ -57,7 +63,7 @@
   @media (max-width:850px){
     body{padding:8px}.app{height:calc(100vh - 16px);grid-template-rows:95px 1fr;gap:8px}
     .top,.main{gap:8px}.clock{padding:10px 14px}#time{font-size:44px}
-    .weather{padding:10px 14px}.card{border-radius:14px}.main{grid-template-columns:1.7fr .8fr}
+    .weather{padding:10px 14px}.card{border-radius:14px}.main{grid-template-columns:3fr 1fr}
     .setup{padding:12px}.today{padding:12px}.today .bigdate{font-size:34px}
   }
 </style>
@@ -110,6 +116,17 @@
         <div class="weekday" id="weekday">--</div>
       </section>
 
+      <section class="card nextbox" id="nextBox">
+        <h3>Übersicht</h3>
+        <div class="clockmini" id="miniTime">--:--</div>
+        <div class="datemini" id="miniDate">--</div>
+        <div class="line"></div>
+        <div class="hint">
+          Deine Termine erscheinen direkt im Google-Kalender links.
+          Neue Einträge vom Smartphone oder PC werden automatisch übernommen.
+        </div>
+      </section>
+
       <section class="card setup" id="setupPanel">
         <h3>Einrichtung</h3>
         <p>
@@ -141,6 +158,10 @@
     document.getElementById("monthTitle").textContent = months[d.getMonth()] + " " + d.getFullYear();
     document.getElementById("dayNumber").textContent = d.getDate();
     document.getElementById("weekday").textContent = weekdays[d.getDay()];
+    var mt = document.getElementById("miniTime");
+    var md = document.getElementById("miniDate");
+    if(mt) mt.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes());
+    if(md) md.textContent = weekdays[d.getDay()] + ", " + d.getDate() + ". " + months[d.getMonth()];
   }
   updateClock();
   setInterval(updateClock, 1000);
@@ -214,12 +235,16 @@
   var sidePanel = document.getElementById("sidePanel");
   var settingsBtn = document.getElementById("settingsBtn");
 
+  var nextBox = document.getElementById("nextBox");
+
   function setConfigured(configured){
     if(configured){
       setupPanel.style.display = "none";
+      nextBox.style.display = "block";
       sidePanel.className = "side configured";
     } else {
       setupPanel.style.display = "block";
+      nextBox.style.display = "none";
       sidePanel.className = "side";
     }
   }
@@ -228,6 +253,8 @@
     input.value = saved;
     showCalendar(saved);
     setConfigured(true);
+  } else {
+    setConfigured(false);
   }
 
   settingsBtn.addEventListener("click", function(){
