@@ -120,28 +120,26 @@
     </section>
 
     <aside class="side" id="sidePanel">
-      <section class="card today">
-        <h2>Heute</h2>
-        <div class="bigdate" id="dayNumber">--</div>
-        <div class="weekday" id="weekday">--</div>
-      </section>
-
-      <section class="card nextbox" id="nextBox">
-        <h3>Übersicht</h3>
-        <div class="clockmini" id="miniTime">--:--</div>
-        <div class="datemini" id="miniDate">--</div>
-        <div class="line"></div>
-        <div class="hint">
-          Deine Termine erscheinen direkt im Google-Kalender links.
-          Neue Einträge vom Smartphone oder PC werden automatisch übernommen.
+      <section class="card calendarCard" style="height:100%">
+        <div class="monthbar">
+          <div style="font-size:22px;font-weight:700">Termine</div>
+          <div class="small">Agenda</div>
+        </div>
+        <div class="calendarWrap">
+          <iframe id="agendaFrame" title="Google Kalender Termine"></iframe>
+          <div class="emptyCalendar" id="agendaEmpty">
+            <div>
+              <strong>Terminliste</strong>
+              Wird automatisch aus deinem Google Kalender geladen.
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="card setup" id="setupPanel">
+      <section class="card setup" id="setupPanel" style="display:none">
         <h3>Einrichtung</h3>
         <p>
-          Füge hier den <b>Google-Kalender-Einbettungslink</b> ein
-          (er beginnt normalerweise mit <b>https://calendar.google.com/calendar/embed?</b>).
+          Füge hier den <b>Google-Kalender-Einbettungslink</b> ein.
         </p>
         <input id="calendarUrl" type="url" placeholder="Google-Kalender-Einbettungslink">
         <button id="saveBtn">Kalender speichern</button>
@@ -234,29 +232,51 @@
     return url.replace(/&amp;/g,"&");
   }
 
+  function agendaUrlFrom(url){
+    if(!url) return "";
+    var base = url;
+    if(base.indexOf("mode=") !== -1){
+      base = base.replace(/([?&])mode=[^&]*/i, "$1mode=AGENDA");
+    } else {
+      base += (base.indexOf("?") === -1 ? "?" : "&") + "mode=AGENDA";
+    }
+    return base;
+  }
+
   function showCalendar(url){
-    if(!url){ frame.removeAttribute("src"); empty.style.display="flex"; return; }
+    if(!url){
+      frame.removeAttribute("src");
+      empty.style.display="flex";
+      agendaFrame.removeAttribute("src");
+      agendaEmpty.style.display="flex";
+      return;
+    }
     frame.src = url;
     empty.style.display="none";
+    agendaFrame.src = agendaUrlFrom(url);
+    agendaEmpty.style.display="none";
   }
+
+  function refreshGoogleCalendar(){
+    var url = localStorage.getItem("ipadDashboardCalendarUrl") || "";
+    if(url){
+      frame.src = url;
+      agendaFrame.src = agendaUrlFrom(url);
+    }
+  }
+
+  // Tischdisplay: Google-Kalender alle 5 Minuten automatisch aktualisieren.
+  setInterval(refreshGoogleCalendar, 5 * 60 * 1000);
 
   var saved = localStorage.getItem("ipadDashboardCalendarUrl") || "";
   var setupPanel = document.getElementById("setupPanel");
   var sidePanel = document.getElementById("sidePanel");
   var settingsBtn = document.getElementById("settingsBtn");
-
-  var nextBox = document.getElementById("nextBox");
+  var agendaFrame = document.getElementById("agendaFrame");
+  var agendaEmpty = document.getElementById("agendaEmpty");
 
   function setConfigured(configured){
-    if(configured){
-      setupPanel.style.display = "none";
-      nextBox.style.display = "none";
-      sidePanel.className = "side configured";
-    } else {
-      setupPanel.style.display = "block";
-      nextBox.style.display = "none";
-      sidePanel.className = "side";
-    }
+    setupPanel.style.display = "none";
   }
 
   if(saved){
