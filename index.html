@@ -26,8 +26,8 @@
   #weatherIcon{font-size:52px}
   #temp{font-size:38px;font-weight:700}
   #weatherText,#weatherPlace{color:var(--muted);font-size:16px}
-  .main{display:grid;grid-template-columns:3fr 1fr;gap:12px;min-height:0}
-  .calendarCard{padding:14px;display:grid;grid-template-rows:auto 1fr;min-height:0}
+  .main{display:block;min-height:0}
+  .calendarCard{padding:14px;display:grid;grid-template-rows:auto 1fr;min-height:0;height:100%}
   .monthbar{display:flex;align-items:center;justify-content:space-between;padding:2px 6px 10px}
   #monthTitle{font-size:25px;font-weight:700}
   .small{color:var(--muted);font-size:13px}
@@ -36,7 +36,7 @@
   .emptyCalendar{position:absolute;inset:0;background:var(--panel2);display:flex;align-items:center;
     justify-content:center;text-align:center;padding:34px;color:var(--muted);font-size:18px}
   .emptyCalendar strong{display:block;color:var(--text);font-size:23px;margin-bottom:10px}
-  .side{display:grid;grid-template-rows:auto 1fr;gap:12px;min-height:0}
+  .side{display:none}
   .side.configured{grid-template-rows:auto 1fr}
   .side.configured .today{display:block;text-align:left}
   .side.configured .today h2{font-size:20px}
@@ -60,10 +60,20 @@
   .setup button{width:100%;border:0;border-radius:10px;background:var(--accent);color:#101318;
     padding:11px;font-size:15px;font-weight:700}
   .status{font-size:12px;color:var(--muted);margin-top:8px}
+  .settingsOverlay{display:none;position:fixed;right:18px;top:145px;width:360px;max-width:calc(100vw - 36px);
+    z-index:20;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;
+    box-shadow:0 16px 50px rgba(0,0,0,.45)}
+  .settingsOverlay.open{display:block}
+  .settingsOverlay h3{margin:0 0 8px}
+  .settingsOverlay p{font-size:13px;color:var(--muted);line-height:1.4}
+  .settingsOverlay input{width:100%;border:1px solid var(--line);background:#0f1115;color:var(--text);
+    border-radius:10px;padding:10px;font-size:13px;margin:6px 0}
+  .settingsOverlay button{width:100%;border:0;border-radius:10px;background:var(--accent);color:#101318;
+    padding:10px;font-size:14px;font-weight:700}
   @media (max-width:850px){
     body{padding:8px}.app{height:calc(100vh - 16px);grid-template-rows:95px 1fr;gap:8px}
     .top,.main{gap:8px}.clock{padding:10px 14px}#time{font-size:44px}
-    .weather{padding:10px 14px}.card{border-radius:14px}.main{grid-template-columns:3fr 1fr}
+    .weather{padding:10px 14px}.card{border-radius:14px}.main{display:block}
     .setup{padding:12px}.today{padding:12px}.today .bigdate{font-size:34px}
   }
 </style>
@@ -102,7 +112,7 @@
         <div class="emptyCalendar" id="calendarEmpty">
           <div>
             <strong>Google Kalender verbinden</strong>
-            Rechts deinen Google-Kalender-Einbettungslink einfügen.<br>
+            Oben auf ⚙ tippen und deinen Google-Kalender-Link einfügen.<br>
             Danach wird er auf diesem Gerät gespeichert.
           </div>
         </div>
@@ -257,8 +267,32 @@
     setConfigured(false);
   }
 
+  var settingsOverlay = document.getElementById("settingsOverlay");
+  var overlayInput = document.getElementById("overlayCalendarUrl");
+  var overlayStatus = document.getElementById("overlayStatus");
+  if(saved) overlayInput.value = saved;
+
   settingsBtn.addEventListener("click", function(){
-    setConfigured(setupPanel.style.display !== "none");
+    if(settingsOverlay.className.indexOf("open") === -1){
+      settingsOverlay.className = "settingsOverlay open";
+      overlayInput.value = localStorage.getItem("ipadDashboardCalendarUrl") || "";
+    } else {
+      settingsOverlay.className = "settingsOverlay";
+    }
+  });
+
+  document.getElementById("overlaySaveBtn").addEventListener("click", function(){
+    var url = normalizeCalendarUrl(overlayInput.value);
+    if(url.indexOf("https://calendar.google.com/calendar/embed") !== 0 &&
+       url.indexOf("https://www.google.com/calendar/embed") !== 0){
+      overlayStatus.textContent = "Bitte einen gültigen Google-Kalender-Einbettungslink einfügen.";
+      return;
+    }
+    localStorage.setItem("ipadDashboardCalendarUrl", url);
+    input.value = url;
+    showCalendar(url);
+    overlayStatus.textContent = "Gespeichert ✓";
+    setTimeout(function(){ settingsOverlay.className = "settingsOverlay"; }, 600);
   });
 
   document.getElementById("saveBtn").addEventListener("click", function(){
@@ -276,5 +310,14 @@
   });
 })();
 </script>
+
+<div class="settingsOverlay" id="settingsOverlay">
+  <h3>Kalender-Einstellungen</h3>
+  <p>Hier kannst du den gespeicherten Google-Kalender-Link ändern.</p>
+  <input id="overlayCalendarUrl" type="url" placeholder="Google-Kalender-Einbettungslink">
+  <button id="overlaySaveBtn">Kalender speichern</button>
+  <div class="status" id="overlayStatus">Der Link wird nur lokal auf diesem Gerät gespeichert.</div>
+</div>
+
 </body>
 </html>
