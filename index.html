@@ -60,7 +60,7 @@
   .setup button{width:100%;border:0;border-radius:10px;background:var(--accent);color:#101318;
     padding:11px;font-size:15px;font-weight:700}
   .status{font-size:12px;color:var(--muted);margin-top:8px}
-  .settingsOverlay{display:none;position:fixed;right:18px;top:145px;width:430px;max-width:calc(100vw - 24px);
+  .settingsOverlay{display:none !important;position:fixed;right:18px;top:145px;width:430px;max-width:calc(100vw - 24px);
     z-index:20;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;
     box-shadow:0 16px 50px rgba(0,0,0,.45)}
   .settingsOverlay.open{display:block}
@@ -104,7 +104,7 @@
         <div id="monthTitle">Kalender</div>
         <div style="display:flex;align-items:center;gap:10px">
           <div class="small">Google Kalender</div>
-          <button id="settingsBtn" type="button" onclick="openCalendarSettings()" title="Kalender-Einstellungen" style="width:44px;height:44px;padding:0;background:#2b303b;color:#f4f6f8;border:0;border-radius:10px;font-weight:700;font-size:20px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">⚙</button>
+          
         </div>
       </div>
       <div class="calendarWrap">
@@ -258,17 +258,15 @@
   }
 
   function refreshGoogleCalendar(){
-    var url = localStorage.getItem("ipadDashboardCalendarUrl") || "";
-    if(url){
-      frame.src = url;
-      agendaFrame.src = agendaUrlFrom(url);
-    }
+    var url = saved;
+    frame.src = url;
+    agendaFrame.src = agendaUrlFrom(url);
   }
 
   // Tischdisplay: Google-Kalender alle 5 Minuten automatisch aktualisieren.
   setInterval(refreshGoogleCalendar, 5 * 60 * 1000);
 
-  var saved = localStorage.getItem("ipadDashboardCalendarUrl") || "";
+  var saved = "https://calendar.google.com/calendar/embed?src=nsponseil%40gmail.com\&ctz=Europe%2FBerlin";
   var setupPanel = document.getElementById("setupPanel");
   var sidePanel = document.getElementById("sidePanel");
   var settingsBtn = document.getElementById("settingsBtn");
@@ -283,8 +281,6 @@
     input.value = saved;
     showCalendar(saved);
     setConfigured(true);
-  } else {
-    setConfigured(false);
   }
 
   var settingsOverlay = document.getElementById("settingsOverlay");
