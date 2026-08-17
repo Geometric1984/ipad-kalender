@@ -37,6 +37,11 @@
     justify-content:center;text-align:center;padding:34px;color:var(--muted);font-size:18px}
   .emptyCalendar strong{display:block;color:var(--text);font-size:23px;margin-bottom:10px}
   .side{display:grid;grid-template-rows:auto 1fr;gap:12px;min-height:0}
+  .side.configured{grid-template-rows:1fr}
+  .side.configured .today{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+  .side.configured .today h2{font-size:24px}
+  .side.configured .today .bigdate{font-size:72px}
+  .side.configured .today .weekday{font-size:20px}
   .today{padding:18px}
   .today h2{margin:0 0 8px;font-size:21px}
   .today .bigdate{font-size:42px;font-weight:750;line-height:1}
@@ -81,7 +86,10 @@
     <section class="card calendarCard">
       <div class="monthbar">
         <div id="monthTitle">Kalender</div>
-        <div class="small">Google Kalender</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="small">Google Kalender</div>
+          <button id="settingsBtn" title="Kalender-Einstellungen" style="width:auto;padding:6px 10px;background:#2b303b;color:#f4f6f8;border:0;border-radius:8px;font-weight:700">⚙</button>
+        </div>
       </div>
       <div class="calendarWrap">
         <iframe id="calendarFrame" title="Google Kalender"></iframe>
@@ -95,14 +103,14 @@
       </div>
     </section>
 
-    <aside class="side">
+    <aside class="side" id="sidePanel">
       <section class="card today">
         <h2>Heute</h2>
         <div class="bigdate" id="dayNumber">--</div>
         <div class="weekday" id="weekday">--</div>
       </section>
 
-      <section class="card setup">
+      <section class="card setup" id="setupPanel">
         <h3>Einrichtung</h3>
         <p>
           Füge hier den <b>Google-Kalender-Einbettungslink</b> ein
@@ -202,7 +210,29 @@
   }
 
   var saved = localStorage.getItem("ipadDashboardCalendarUrl") || "";
-  if(saved){ input.value = saved; showCalendar(saved); }
+  var setupPanel = document.getElementById("setupPanel");
+  var sidePanel = document.getElementById("sidePanel");
+  var settingsBtn = document.getElementById("settingsBtn");
+
+  function setConfigured(configured){
+    if(configured){
+      setupPanel.style.display = "none";
+      sidePanel.className = "side configured";
+    } else {
+      setupPanel.style.display = "block";
+      sidePanel.className = "side";
+    }
+  }
+
+  if(saved){
+    input.value = saved;
+    showCalendar(saved);
+    setConfigured(true);
+  }
+
+  settingsBtn.addEventListener("click", function(){
+    setConfigured(setupPanel.style.display !== "none");
+  });
 
   document.getElementById("saveBtn").addEventListener("click", function(){
     var url = normalizeCalendarUrl(input.value);
@@ -215,6 +245,7 @@
     input.value = url;
     showCalendar(url);
     status.textContent = "Gespeichert ✓";
+    setConfigured(true);
   });
 })();
 </script>
