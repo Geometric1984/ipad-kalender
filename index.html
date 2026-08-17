@@ -26,7 +26,7 @@
   #weatherIcon{font-size:52px}
   #temp{font-size:38px;font-weight:700}
   #weatherText,#weatherPlace{color:var(--muted);font-size:16px}
-  .main{display:block;min-height:0}
+  .main{display:grid;grid-template-columns:3fr 1fr;gap:12px;min-height:0}
   .calendarCard{padding:14px;display:grid;grid-template-rows:auto 1fr;min-height:0;height:100%}
   .monthbar{display:flex;align-items:center;justify-content:space-between;padding:2px 6px 10px}
   #monthTitle{font-size:25px;font-weight:700}
@@ -36,12 +36,12 @@
   .emptyCalendar{position:absolute;inset:0;background:var(--panel2);display:flex;align-items:center;
     justify-content:center;text-align:center;padding:34px;color:var(--muted);font-size:18px}
   .emptyCalendar strong{display:block;color:var(--text);font-size:23px;margin-bottom:10px}
-  .side{display:none}
-  .side.configured{grid-template-rows:auto 1fr}
-  .side.configured .today{display:block;text-align:left}
-  .side.configured .today h2{font-size:20px}
-  .side.configured .today .bigdate{font-size:58px}
-  .side.configured .today .weekday{font-size:18px}
+  .side{display:grid;grid-template-rows:auto 1fr;gap:12px;min-height:0}
+  .side.configured{grid-template-rows:1fr}
+  .side.configured .today{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+  .side.configured .today h2{font-size:24px}
+  .side.configured .today .bigdate{font-size:72px}
+  .side.configured .today .weekday{font-size:20px}
   .nextbox{padding:18px}
   .nextbox h3{margin:0 0 12px;font-size:19px}
   .nextbox .hint{color:var(--muted);font-size:14px;line-height:1.5}
@@ -73,7 +73,7 @@
   @media (max-width:850px){
     body{padding:8px}.app{height:calc(100vh - 16px);grid-template-rows:95px 1fr;gap:8px}
     .top,.main{gap:8px}.clock{padding:10px 14px}#time{font-size:44px}
-    .weather{padding:10px 14px}.card{border-radius:14px}.main{display:block}
+    .weather{padding:10px 14px}.card{border-radius:14px}.main{grid-template-columns:3fr 1fr}
     .setup{padding:12px}.today{padding:12px}.today .bigdate{font-size:34px}
   }
 </style>
@@ -104,7 +104,7 @@
         <div id="monthTitle">Kalender</div>
         <div style="display:flex;align-items:center;gap:10px">
           <div class="small">Google Kalender</div>
-          <button id="settingsBtn" title="Kalender-Einstellungen" style="width:auto;padding:6px 10px;background:#2b303b;color:#f4f6f8;border:0;border-radius:8px;font-weight:700">⚙</button>
+          <button id="settingsBtn" title="Kalender-Einstellungen" style="width:44px;height:44px;padding:0;background:#2b303b;color:#f4f6f8;border:0;border-radius:10px;font-weight:700;font-size:20px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">⚙</button>
         </div>
       </div>
       <div class="calendarWrap">
@@ -112,8 +112,8 @@
         <div class="emptyCalendar" id="calendarEmpty">
           <div>
             <strong>Google Kalender verbinden</strong>
-            Oben auf ⚙ tippen und deinen Google-Kalender-Link einfügen.<br>
-            Danach wird er auf diesem Gerät gespeichert.
+            Auf diesem Gerät ist noch kein Kalender gespeichert.<br>
+            <button id="firstSetupBtn" style="margin-top:16px;border:0;border-radius:10px;background:#8ab4f8;color:#101318;padding:12px 18px;font-size:16px;font-weight:700">Kalender einrichten</button>
           </div>
         </div>
       </div>
@@ -250,7 +250,7 @@
   function setConfigured(configured){
     if(configured){
       setupPanel.style.display = "none";
-      nextBox.style.display = "block";
+      nextBox.style.display = "none";
       sidePanel.className = "side configured";
     } else {
       setupPanel.style.display = "block";
@@ -272,28 +272,44 @@
   var overlayStatus = document.getElementById("overlayStatus");
   if(saved) overlayInput.value = saved;
 
-  settingsBtn.addEventListener("click", function(){
+  function toggleSettings(e){
+    if(e && e.preventDefault) e.preventDefault();
     if(settingsOverlay.className.indexOf("open") === -1){
       settingsOverlay.className = "settingsOverlay open";
       overlayInput.value = localStorage.getItem("ipadDashboardCalendarUrl") || "";
     } else {
       settingsOverlay.className = "settingsOverlay";
     }
-  });
+    return false;
+  }
 
-  document.getElementById("overlaySaveBtn").addEventListener("click", function(){
+  settingsBtn.onclick = toggleSettings;
+  settingsBtn.ontouchend = toggleSettings;
+
+  var firstSetupBtn = document.getElementById("firstSetupBtn");
+  if(firstSetupBtn){
+    firstSetupBtn.onclick = toggleSettings;
+    firstSetupBtn.ontouchend = toggleSettings;
+  }
+
+  function saveOverlayCalendar(e){
+    if(e && e.preventDefault) e.preventDefault();
     var url = normalizeCalendarUrl(overlayInput.value);
     if(url.indexOf("https://calendar.google.com/calendar/embed") !== 0 &&
        url.indexOf("https://www.google.com/calendar/embed") !== 0){
       overlayStatus.textContent = "Bitte einen gültigen Google-Kalender-Einbettungslink einfügen.";
-      return;
+      return false;
     }
     localStorage.setItem("ipadDashboardCalendarUrl", url);
     input.value = url;
     showCalendar(url);
     overlayStatus.textContent = "Gespeichert ✓";
     setTimeout(function(){ settingsOverlay.className = "settingsOverlay"; }, 600);
-  });
+    return false;
+  }
+  var overlaySaveBtn = document.getElementById("overlaySaveBtn");
+  overlaySaveBtn.onclick = saveOverlayCalendar;
+  overlaySaveBtn.ontouchend = saveOverlayCalendar;
 
   document.getElementById("saveBtn").addEventListener("click", function(){
     var url = normalizeCalendarUrl(input.value);
