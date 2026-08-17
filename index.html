@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f1115">
+<title>iPad Kalender Dashboard</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --text:#f4f6f8;
+    --muted:#aab1bd; --line:#2b303b; --accent:#8ab4f8; --today:#26364f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;overflow:hidden}
+  body{padding:14px}
+  .app{height:calc(100vh - 28px);display:grid;grid-template-rows:112px 1fr;gap:12px}
+  .top{display:grid;grid-template-columns:1.15fr 1fr;gap:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:18px}
+  .clock{padding:15px 22px;display:flex;align-items:center;justify-content:space-between}
+  #time{font-size:58px;font-weight:700;letter-spacing:-2px;line-height:1}
+  #date{font-size:18px;color:var(--muted);margin-top:7px}
+  .weather{padding:14px 20px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+  #weatherIcon{font-size:52px}
+  #temp{font-size:38px;font-weight:700}
+  #weatherText,#weatherPlace{color:var(--muted);font-size:16px}
+  .main{display:grid;grid-template-columns:1.8fr .85fr;gap:12px;min-height:0}
+  .calendarCard{padding:14px;display:grid;grid-template-rows:auto 1fr;min-height:0}
+  .monthbar{display:flex;align-items:center;justify-content:space-between;padding:2px 6px 10px}
+  #monthTitle{font-size:25px;font-weight:700}
+  .small{color:var(--muted);font-size:13px}
+  .calendarWrap{position:relative;min-height:0;border-radius:14px;overflow:hidden;background:white}
+  iframe{border:0;width:100%;height:100%;display:block;background:white}
+  .emptyCalendar{position:absolute;inset:0;background:var(--panel2);display:flex;align-items:center;
+    justify-content:center;text-align:center;padding:34px;color:var(--muted);font-size:18px}
+  .emptyCalendar strong{display:block;color:var(--text);font-size:23px;margin-bottom:10px}
+  .side{display:grid;grid-template-rows:auto 1fr;gap:12px;min-height:0}
+  .today{padding:18px}
+  .today h2{margin:0 0 8px;font-size:21px}
+  .today .bigdate{font-size:42px;font-weight:750;line-height:1}
+  .today .weekday{color:var(--muted);font-size:17px;margin-top:6px}
+  .setup{padding:18px;overflow:auto}
+  .setup h3{margin:0 0 10px}
+  .setup p{font-size:14px;color:var(--muted);line-height:1.45}
+  .setup input{width:100%;border:1px solid var(--line);background:#0f1115;color:var(--text);
+    border-radius:10px;padding:11px;font-size:14px;margin:7px 0}
+  .setup button{width:100%;border:0;border-radius:10px;background:var(--accent);color:#101318;
+    padding:11px;font-size:15px;font-weight:700}
+  .status{font-size:12px;color:var(--muted);margin-top:8px}
+  @media (max-width:850px){
+    body{padding:8px}.app{height:calc(100vh - 16px);grid-template-rows:95px 1fr;gap:8px}
+    .top,.main{gap:8px}.clock{padding:10px 14px}#time{font-size:44px}
+    .weather{padding:10px 14px}.card{border-radius:14px}.main{grid-template-columns:1.7fr .8fr}
+    .setup{padding:12px}.today{padding:12px}.today .bigdate{font-size:34px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <section class="card clock">
+      <div>
+        <div id="time">--:--</div>
+        <div id="date">Datum wird geladen …</div>
+      </div>
+    </section>
+
+    <section class="card weather">
+      <div id="weatherIcon">🌤️</div>
+      <div>
+        <div><span id="temp">--°</span></div>
+        <div id="weatherText">Wetter wird geladen …</div>
+        <div id="weatherPlace">Standort automatisch</div>
+      </div>
+    </section>
+  </div>
+
+  <main class="main">
+    <section class="card calendarCard">
+      <div class="monthbar">
+        <div id="monthTitle">Kalender</div>
+        <div class="small">Google Kalender</div>
+      </div>
+      <div class="calendarWrap">
+        <iframe id="calendarFrame" title="Google Kalender"></iframe>
+        <div class="emptyCalendar" id="calendarEmpty">
+          <div>
+            <strong>Google Kalender verbinden</strong>
+            Rechts deinen Google-Kalender-Einbettungslink einfügen.<br>
+            Danach wird er auf diesem Gerät gespeichert.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="card today">
+        <h2>Heute</h2>
+        <div class="bigdate" id="dayNumber">--</div>
+        <div class="weekday" id="weekday">--</div>
+      </section>
+
+      <section class="card setup">
+        <h3>Einrichtung</h3>
+        <p>
+          Füge hier den <b>Google-Kalender-Einbettungslink</b> ein
+          (er beginnt normalerweise mit <b>https://calendar.google.com/calendar/embed?</b>).
+        </p>
+        <input id="calendarUrl" type="url" placeholder="Google-Kalender-Einbettungslink">
+        <button id="saveBtn">Kalender speichern</button>
+        <div class="status" id="status">Der Link wird nur lokal im Browser dieses iPads gespeichert.</div>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var months = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+  var weekdays = ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+
+  function pad(n){ return n < 10 ? "0"+n : String(n); }
+
+  function updateClock(){
+    var d = new Date();
+    document.getElementById("time").textContent = pad(d.getHours()) + ":" + pad(d.getMinutes());
+    document.getElementById("date").textContent =
+      weekdays[d.getDay()] + " · " + d.getDate() + ". " + months[d.getMonth()] + " " + d.getFullYear();
+    document.getElementById("monthTitle").textContent = months[d.getMonth()] + " " + d.getFullYear();
+    document.getElementById("dayNumber").textContent = d.getDate();
+    document.getElementById("weekday").textContent = weekdays[d.getDay()];
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  function weatherCode(code){
+    if(code === 0) return ["☀️","Klar"];
+    if(code === 1 || code === 2) return ["🌤️","Teilweise bewölkt"];
+    if(code === 3) return ["☁️","Bewölkt"];
+    if(code === 45 || code === 48) return ["🌫️","Nebel"];
+    if(code >= 51 && code <= 57) return ["🌦️","Nieselregen"];
+    if(code >= 61 && code <= 67) return ["🌧️","Regen"];
+    if(code >= 71 && code <= 77) return ["🌨️","Schnee"];
+    if(code >= 80 && code <= 82) return ["🌦️","Regenschauer"];
+    if(code >= 85 && code <= 86) return ["🌨️","Schneeschauer"];
+    if(code >= 95) return ["⛈️","Gewitter"];
+    return ["🌤️","Wetter"];
+  }
+
+  function loadWeather(lat, lon, label){
+    var url = "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(lat) +
+      "&longitude=" + encodeURIComponent(lon) +
+      "&current=temperature_2m,weather_code&timezone=auto";
+    fetch(url).then(function(r){ return r.json(); }).then(function(data){
+      var cur = data.current || {};
+      var wc = weatherCode(Number(cur.weather_code));
+      document.getElementById("weatherIcon").textContent = wc[0];
+      document.getElementById("temp").textContent = Math.round(Number(cur.temperature_2m)) + "°";
+      document.getElementById("weatherText").textContent = wc[1];
+      document.getElementById("weatherPlace").textContent = label || "Aktueller Standort";
+    }).catch(function(){
+      document.getElementById("weatherText").textContent = "Wetter momentan nicht erreichbar";
+    });
+  }
+
+  function initWeather(){
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        function(pos){ loadWeather(pos.coords.latitude, pos.coords.longitude, "Aktueller Standort"); },
+        function(){ loadWeather(49.4521, 11.0767, "Nürnberg"); },
+        {enableHighAccuracy:false, timeout:7000, maximumAge:3600000}
+      );
+    } else {
+      loadWeather(49.4521, 11.0767, "Nürnberg");
+    }
+  }
+  initWeather();
+  setInterval(initWeather, 30 * 60 * 1000);
+
+  var frame = document.getElementById("calendarFrame");
+  var empty = document.getElementById("calendarEmpty");
+  var input = document.getElementById("calendarUrl");
+  var status = document.getElementById("status");
+
+  function normalizeCalendarUrl(url){
+    url = (url || "").trim();
+    if(url.indexOf("<iframe") !== -1){
+      var match = url.match(/src=["']([^"']+)["']/i);
+      if(match && match[1]) url = match[1];
+    }
+    return url.replace(/&amp;/g,"&");
+  }
+
+  function showCalendar(url){
+    if(!url){ frame.removeAttribute("src"); empty.style.display="flex"; return; }
+    frame.src = url;
+    empty.style.display="none";
+  }
+
+  var saved = localStorage.getItem("ipadDashboardCalendarUrl") || "";
+  if(saved){ input.value = saved; showCalendar(saved); }
+
+  document.getElementById("saveBtn").addEventListener("click", function(){
+    var url = normalizeCalendarUrl(input.value);
+    if(url.indexOf("https://calendar.google.com/calendar/embed") !== 0 &&
+       url.indexOf("https://www.google.com/calendar/embed") !== 0){
+      status.textContent = "Bitte einen gültigen Google-Kalender-Einbettungslink einfügen.";
+      return;
+    }
+    localStorage.setItem("ipadDashboardCalendarUrl", url);
+    input.value = url;
+    showCalendar(url);
+    status.textContent = "Gespeichert ✓";
+  });
+})();
+</script>
+</body>
+</html>
