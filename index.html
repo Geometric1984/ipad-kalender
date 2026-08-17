@@ -60,7 +60,7 @@
   .setup button{width:100%;border:0;border-radius:10px;background:var(--accent);color:#101318;
     padding:11px;font-size:15px;font-weight:700}
   .status{font-size:12px;color:var(--muted);margin-top:8px}
-  .settingsOverlay{display:none;position:fixed;right:18px;top:145px;width:360px;max-width:calc(100vw - 36px);
+  .settingsOverlay{display:none;position:fixed;right:18px;top:145px;width:430px;max-width:calc(100vw - 24px);
     z-index:20;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;
     box-shadow:0 16px 50px rgba(0,0,0,.45)}
   .settingsOverlay.open{display:block}
@@ -104,7 +104,7 @@
         <div id="monthTitle">Kalender</div>
         <div style="display:flex;align-items:center;gap:10px">
           <div class="small">Google Kalender</div>
-          <button id="settingsBtn" title="Kalender-Einstellungen" style="width:44px;height:44px;padding:0;background:#2b303b;color:#f4f6f8;border:0;border-radius:10px;font-weight:700;font-size:20px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">⚙</button>
+          <button id="settingsBtn" type="button" onclick="openCalendarSettings()" title="Kalender-Einstellungen" style="width:44px;height:44px;padding:0;background:#2b303b;color:#f4f6f8;border:0;border-radius:10px;font-weight:700;font-size:20px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">⚙</button>
         </div>
       </div>
       <div class="calendarWrap">
@@ -113,7 +113,7 @@
           <div>
             <strong>Google Kalender verbinden</strong>
             Auf diesem Gerät ist noch kein Kalender gespeichert.<br>
-            <button id="firstSetupBtn" style="margin-top:16px;border:0;border-radius:10px;background:#8ab4f8;color:#101318;padding:12px 18px;font-size:16px;font-weight:700">Kalender einrichten</button>
+            <button id="firstSetupBtn" type="button" onclick="openCalendarSettings()" style="margin-top:16px;border:0;border-radius:10px;background:#8ab4f8;color:#101318;padding:12px 18px;font-size:16px;font-weight:700">Kalender einrichten</button>
           </div>
         </div>
       </div>
@@ -272,44 +272,30 @@
   var overlayStatus = document.getElementById("overlayStatus");
   if(saved) overlayInput.value = saved;
 
-  function toggleSettings(e){
-    if(e && e.preventDefault) e.preventDefault();
-    if(settingsOverlay.className.indexOf("open") === -1){
-      settingsOverlay.className = "settingsOverlay open";
-      overlayInput.value = localStorage.getItem("ipadDashboardCalendarUrl") || "";
-    } else {
-      settingsOverlay.className = "settingsOverlay";
-    }
-    return false;
-  }
+  window.openCalendarSettings = function(){
+    var savedUrl = localStorage.getItem("ipadDashboardCalendarUrl") || "";
+    overlayInput.value = savedUrl;
+    settingsOverlay.className = "settingsOverlay open";
+  };
 
-  settingsBtn.onclick = toggleSettings;
-  settingsBtn.ontouchend = toggleSettings;
-
-  var firstSetupBtn = document.getElementById("firstSetupBtn");
-  if(firstSetupBtn){
-    firstSetupBtn.onclick = toggleSettings;
-    firstSetupBtn.ontouchend = toggleSettings;
-  }
-
-  function saveOverlayCalendar(e){
-    if(e && e.preventDefault) e.preventDefault();
+  window.saveCalendarFromOverlay = function(){
     var url = normalizeCalendarUrl(overlayInput.value);
     if(url.indexOf("https://calendar.google.com/calendar/embed") !== 0 &&
        url.indexOf("https://www.google.com/calendar/embed") !== 0){
-      overlayStatus.textContent = "Bitte einen gültigen Google-Kalender-Einbettungslink einfügen.";
-      return false;
+      overlayStatus.textContent = "Bitte den vollständigen Google-Kalender-Link einfügen.";
+      return;
     }
-    localStorage.setItem("ipadDashboardCalendarUrl", url);
+    try {
+      localStorage.setItem("ipadDashboardCalendarUrl", url);
+    } catch(e) {
+      overlayStatus.textContent = "Safari konnte den Link nicht speichern.";
+      return;
+    }
     input.value = url;
     showCalendar(url);
     overlayStatus.textContent = "Gespeichert ✓";
-    setTimeout(function(){ settingsOverlay.className = "settingsOverlay"; }, 600);
-    return false;
-  }
-  var overlaySaveBtn = document.getElementById("overlaySaveBtn");
-  overlaySaveBtn.onclick = saveOverlayCalendar;
-  overlaySaveBtn.ontouchend = saveOverlayCalendar;
+    settingsOverlay.className = "settingsOverlay";
+  };
 
   document.getElementById("saveBtn").addEventListener("click", function(){
     var url = normalizeCalendarUrl(input.value);
@@ -328,10 +314,10 @@
 </script>
 
 <div class="settingsOverlay" id="settingsOverlay">
-  <h3>Kalender-Einstellungen</h3>
+  <div style="display:flex;justify-content:space-between;align-items:center"><h3>Kalender-Einstellungen</h3><button type="button" onclick="document.getElementById('settingsOverlay').className='settingsOverlay'" style="width:42px;background:#2b303b;color:white">×</button></div>
   <p>Hier kannst du den gespeicherten Google-Kalender-Link ändern.</p>
   <input id="overlayCalendarUrl" type="url" placeholder="Google-Kalender-Einbettungslink">
-  <button id="overlaySaveBtn">Kalender speichern</button>
+  <button id="overlaySaveBtn" type="button" onclick="saveCalendarFromOverlay()">Kalender speichern</button>
   <div class="status" id="overlayStatus">Der Link wird nur lokal auf diesem Gerät gespeichert.</div>
 </div>
 
