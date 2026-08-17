@@ -6,76 +6,101 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f1115">
-<title>iPad Kalender Dashboard</title>
+<title>iPad Kalender</title>
 <style>
-  :root{
-    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --text:#f4f6f8;
-    --muted:#aab1bd; --line:#2b303b; --accent:#8ab4f8; --today:#26364f;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;overflow:hidden}
-  body{padding:14px}
-  .app{height:calc(100vh - 28px);display:grid;grid-template-rows:112px 1fr;gap:12px}
-  .top{display:grid;grid-template-columns:1.15fr 1fr;gap:12px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:18px}
-  .clock{padding:15px 22px;display:flex;align-items:center;justify-content:space-between}
-  #time{font-size:58px;font-weight:700;letter-spacing:-2px;line-height:1}
-  #date{font-size:18px;color:var(--muted);margin-top:7px}
-  .weather{padding:14px 20px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
-  #weatherIcon{font-size:52px}
-  #temp{font-size:38px;font-weight:700}
-  #weatherText,#weatherPlace{color:var(--muted);font-size:16px}
-  .main{display:grid;grid-template-columns:3fr 1fr;gap:12px;min-height:0}
-  .calendarCard{padding:14px;display:grid;grid-template-rows:auto 1fr;min-height:0;height:100%}
-  .monthbar{display:flex;align-items:center;justify-content:space-between;padding:2px 6px 10px}
-  #monthTitle{font-size:25px;font-weight:700}
-  .small{color:var(--muted);font-size:13px}
-  .calendarWrap{position:relative;min-height:0;border-radius:14px;overflow:hidden;background:white}
-  iframe{border:0;width:100%;height:100%;display:block;background:white}
-  .emptyCalendar{position:absolute;inset:0;background:var(--panel2);display:flex;align-items:center;
-    justify-content:center;text-align:center;padding:34px;color:var(--muted);font-size:18px}
-  .emptyCalendar strong{display:block;color:var(--text);font-size:23px;margin-bottom:10px}
-  .side{display:grid;grid-template-rows:auto 1fr;gap:12px;min-height:0}
-  .side.configured{grid-template-rows:1fr}
-  .side.configured .today{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
-  .side.configured .today h2{font-size:24px}
-  .side.configured .today .bigdate{font-size:72px}
-  .side.configured .today .weekday{font-size:20px}
-  .nextbox{padding:18px}
-  .nextbox h3{margin:0 0 12px;font-size:19px}
-  .nextbox .hint{color:var(--muted);font-size:14px;line-height:1.5}
-  .nextbox .line{height:1px;background:var(--line);margin:14px 0}
-  .nextbox .clockmini{font-size:30px;font-weight:700}
-  .nextbox .datemini{color:var(--muted);font-size:14px;margin-top:4px}
-  .today{padding:18px}
-  .today h2{margin:0 0 8px;font-size:21px}
-  .today .bigdate{font-size:42px;font-weight:750;line-height:1}
-  .today .weekday{color:var(--muted);font-size:17px;margin-top:6px}
-  .setup{padding:18px;overflow:auto}
-  .setup h3{margin:0 0 10px}
-  .setup p{font-size:14px;color:var(--muted);line-height:1.45}
-  .setup input{width:100%;border:1px solid var(--line);background:#0f1115;color:var(--text);
-    border-radius:10px;padding:11px;font-size:14px;margin:7px 0}
-  .setup button{width:100%;border:0;border-radius:10px;background:var(--accent);color:#101318;
-    padding:11px;font-size:15px;font-weight:700}
-  .status{font-size:12px;color:var(--muted);margin-top:8px}
-  .settingsOverlay{display:none !important;position:fixed;right:18px;top:145px;width:430px;max-width:calc(100vw - 24px);
-    z-index:20;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;
-    box-shadow:0 16px 50px rgba(0,0,0,.45)}
-  .settingsOverlay.open{display:block}
-  .settingsOverlay h3{margin:0 0 8px}
-  .settingsOverlay p{font-size:13px;color:var(--muted);line-height:1.4}
-  .settingsOverlay input{width:100%;border:1px solid var(--line);background:#0f1115;color:var(--text);
-    border-radius:10px;padding:10px;font-size:13px;margin:6px 0}
-  .settingsOverlay button{width:100%;border:0;border-radius:10px;background:var(--accent);color:#101318;
-    padding:10px;font-size:14px;font-weight:700}
-  @media (max-width:850px){
-    body{padding:8px}.app{height:calc(100vh - 16px);grid-template-rows:95px 1fr;gap:8px}
-    .top,.main{gap:8px}.clock{padding:10px 14px}#time{font-size:44px}
-    .weather{padding:10px 14px}.card{border-radius:14px}.main{grid-template-columns:3fr 1fr}
-    .setup{padding:12px}.today{padding:12px}.today .bigdate{font-size:34px}
-  }
+:root {
+  --bg:#0f1115; --panel:#171a21; --line:#2b303b; --text:#f4f6f8; --muted:#aab1bd;
+}
+* { box-sizing:border-box; }
+html,body {
+  margin:0; width:100%; height:100%; overflow:hidden;
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+body { padding:12px; }
+.app {
+  height:calc(100vh - 24px);
+  display:grid;
+  grid-template-rows:110px 1fr;
+  gap:12px;
+}
+.top {
+  display:grid;
+  grid-template-columns:1.15fr 1fr;
+  gap:12px;
+}
+.card {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:18px;
+  overflow:hidden;
+}
+.clock {
+  padding:15px 22px;
+  display:flex;
+  align-items:center;
+}
+#time {
+  font-size:58px; font-weight:700; letter-spacing:-2px; line-height:1;
+}
+#date {
+  margin-top:7px; color:var(--muted); font-size:18px;
+}
+.weather {
+  padding:14px 20px;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:16px;
+  align-items:center;
+}
+#weatherIcon { font-size:50px; }
+#temp { font-size:38px; font-weight:700; }
+#weatherText,#weatherPlace { color:var(--muted); font-size:16px; }
+.main {
+  min-height:0;
+  display:grid;
+  grid-template-columns:3fr 1.15fr;
+  gap:12px;
+}
+.calendarCard {
+  min-height:0;
+  padding:12px;
+  display:grid;
+  grid-template-rows:40px 1fr;
+}
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 4px 8px;
+}
+.title { font-size:23px; font-weight:700; }
+.small { font-size:13px; color:var(--muted); }
+.frameWrap {
+  min-height:0;
+  background:white;
+  border-radius:12px;
+  overflow:hidden;
+}
+iframe {
+  width:100%;
+  height:100%;
+  border:0;
+  display:block;
+  background:white;
+}
+@media (max-width:850px) {
+  body { padding:8px; }
+  .app { height:calc(100vh - 16px); grid-template-rows:94px 1fr; gap:8px; }
+  .top,.main { gap:8px; }
+  .clock { padding:10px 14px; }
+  #time { font-size:44px; }
+  .weather { padding:10px 14px; }
+  .card { border-radius:14px; }
+  .main { grid-template-columns:2.7fr 1fr; }
+  .calendarCard { padding:8px; grid-template-rows:36px 1fr; }
+  .title { font-size:19px; }
+}
 </style>
 </head>
 <body>
@@ -87,255 +112,109 @@
         <div id="date">Datum wird geladen …</div>
       </div>
     </section>
-
     <section class="card weather">
       <div id="weatherIcon">🌤️</div>
       <div>
-        <div><span id="temp">--°</span></div>
+        <div id="temp">--°</div>
         <div id="weatherText">Wetter wird geladen …</div>
-        <div id="weatherPlace">Standort automatisch</div>
+        <div id="weatherPlace">Standort</div>
       </div>
     </section>
   </div>
 
   <main class="main">
     <section class="card calendarCard">
-      <div class="monthbar">
-        <div id="monthTitle">Kalender</div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="small">Google Kalender</div>
-          
-        </div>
+      <div class="header">
+        <div class="title" id="monthTitle">Kalender</div>
+        <div class="small">Google Kalender</div>
       </div>
-      <div class="calendarWrap">
-        <iframe id="calendarFrame" title="Google Kalender"></iframe>
-        <div class="emptyCalendar" id="calendarEmpty">
-          <div>
-            <strong>Google Kalender verbinden</strong>
-            Auf diesem Gerät ist noch kein Kalender gespeichert.<br>
-            <button id="firstSetupBtn" type="button" onclick="openCalendarSettings()" style="margin-top:16px;border:0;border-radius:10px;background:#8ab4f8;color:#101318;padding:12px 18px;font-size:16px;font-weight:700">Kalender einrichten</button>
-          </div>
-        </div>
+      <div class="frameWrap">
+        <iframe id="calendarFrame" src="https://calendar.google.com/calendar/embed?src=nsponseil%40gmail.com&ctz=Europe%2FBerlin" title="Google Kalender Monatsansicht"></iframe>
       </div>
     </section>
 
-    <aside class="side" id="sidePanel">
-      <section class="card calendarCard" style="height:100%">
-        <div class="monthbar">
-          <div style="font-size:22px;font-weight:700">Termine</div>
-          <div class="small">Agenda</div>
-        </div>
-        <div class="calendarWrap">
-          <iframe id="agendaFrame" title="Google Kalender Termine"></iframe>
-          <div class="emptyCalendar" id="agendaEmpty">
-            <div>
-              <strong>Terminliste</strong>
-              Wird automatisch aus deinem Google Kalender geladen.
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="card setup" id="setupPanel" style="display:none">
-        <h3>Einrichtung</h3>
-        <p>
-          Füge hier den <b>Google-Kalender-Einbettungslink</b> ein.
-        </p>
-        <input id="calendarUrl" type="url" placeholder="Google-Kalender-Einbettungslink">
-        <button id="saveBtn">Kalender speichern</button>
-        <div class="status" id="status">Der Link wird nur lokal im Browser dieses iPads gespeichert.</div>
-      </section>
-    </aside>
+    <section class="card calendarCard">
+      <div class="header">
+        <div class="title">Termine</div>
+        <div class="small">Agenda</div>
+      </div>
+      <div class="frameWrap">
+        <iframe id="agendaFrame" src="https://calendar.google.com/calendar/embed?src=nsponseil%40gmail.com&ctz=Europe%2FBerlin&mode=AGENDA" title="Google Kalender Agenda"></iframe>
+      </div>
+    </section>
   </main>
 </div>
 
 <script>
-(function(){
+(function() {
   "use strict";
 
-  var months = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
-  var weekdays = ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+  var months=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+  var days=["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
 
-  function pad(n){ return n < 10 ? "0"+n : String(n); }
+  function pad(n) { return n < 10 ? "0"+n : String(n); }
 
-  function updateClock(){
-    var d = new Date();
-    document.getElementById("time").textContent = pad(d.getHours()) + ":" + pad(d.getMinutes());
-    document.getElementById("date").textContent =
-      weekdays[d.getDay()] + " · " + d.getDate() + ". " + months[d.getMonth()] + " " + d.getFullYear();
-    document.getElementById("monthTitle").textContent = months[d.getMonth()] + " " + d.getFullYear();
-    document.getElementById("dayNumber").textContent = d.getDate();
-    document.getElementById("weekday").textContent = weekdays[d.getDay()];
-    var mt = document.getElementById("miniTime");
-    var md = document.getElementById("miniDate");
-    if(mt) mt.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes());
-    if(md) md.textContent = weekdays[d.getDay()] + ", " + d.getDate() + ". " + months[d.getMonth()];
+  function clock() {
+    var d=new Date();
+    document.getElementById("time").textContent=pad(d.getHours())+":"+pad(d.getMinutes());
+    document.getElementById("date").textContent=days[d.getDay()]+" · "+d.getDate()+". "+months[d.getMonth()]+" "+d.getFullYear();
+    document.getElementById("monthTitle").textContent=months[d.getMonth()]+" "+d.getFullYear();
   }
-  updateClock();
-  setInterval(updateClock, 1000);
+  clock();
+  setInterval(clock,1000);
 
-  function weatherCode(code){
-    if(code === 0) return ["☀️","Klar"];
-    if(code === 1 || code === 2) return ["🌤️","Teilweise bewölkt"];
-    if(code === 3) return ["☁️","Bewölkt"];
-    if(code === 45 || code === 48) return ["🌫️","Nebel"];
-    if(code >= 51 && code <= 57) return ["🌦️","Nieselregen"];
-    if(code >= 61 && code <= 67) return ["🌧️","Regen"];
-    if(code >= 71 && code <= 77) return ["🌨️","Schnee"];
-    if(code >= 80 && code <= 82) return ["🌦️","Regenschauer"];
-    if(code >= 85 && code <= 86) return ["🌨️","Schneeschauer"];
-    if(code >= 95) return ["⛈️","Gewitter"];
+  function weatherCode(c) {
+    if(c===0) return ["☀️","Klar"];
+    if(c===1||c===2) return ["🌤️","Teilweise bewölkt"];
+    if(c===3) return ["☁️","Bewölkt"];
+    if(c===45||c===48) return ["🌫️","Nebel"];
+    if(c>=51&&c<=57) return ["🌦️","Nieselregen"];
+    if(c>=61&&c<=67) return ["🌧️","Regen"];
+    if(c>=71&&c<=77) return ["🌨️","Schnee"];
+    if(c>=80&&c<=82) return ["🌦️","Regenschauer"];
+    if(c>=85&&c<=86) return ["🌨️","Schneeschauer"];
+    if(c>=95) return ["⛈️","Gewitter"];
     return ["🌤️","Wetter"];
   }
 
-  function loadWeather(lat, lon, label){
-    var url = "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(lat) +
-      "&longitude=" + encodeURIComponent(lon) +
-      "&current=temperature_2m,weather_code&timezone=auto";
-    fetch(url).then(function(r){ return r.json(); }).then(function(data){
-      var cur = data.current || {};
-      var wc = weatherCode(Number(cur.weather_code));
-      document.getElementById("weatherIcon").textContent = wc[0];
-      document.getElementById("temp").textContent = Math.round(Number(cur.temperature_2m)) + "°";
-      document.getElementById("weatherText").textContent = wc[1];
-      document.getElementById("weatherPlace").textContent = label || "Aktueller Standort";
+  function loadWeather(lat,lon,label) {
+    var url="https://api.open-meteo.com/v1/forecast?latitude="+encodeURIComponent(lat)+
+      "&longitude="+encodeURIComponent(lon)+"&current=temperature_2m,weather_code&timezone=auto";
+    fetch(url).then(function(r){return r.json();}).then(function(data){
+      var cur=data.current||{};
+      var wc=weatherCode(Number(cur.weather_code));
+      document.getElementById("weatherIcon").textContent=wc[0];
+      document.getElementById("temp").textContent=Math.round(Number(cur.temperature_2m))+"°";
+      document.getElementById("weatherText").textContent=wc[1];
+      document.getElementById("weatherPlace").textContent=label;
     }).catch(function(){
-      document.getElementById("weatherText").textContent = "Wetter momentan nicht erreichbar";
+      document.getElementById("weatherText").textContent="Wetter nicht erreichbar";
     });
   }
 
-  function initWeather(){
-    if(navigator.geolocation){
+  function weather() {
+    if(navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        function(pos){ loadWeather(pos.coords.latitude, pos.coords.longitude, "Aktueller Standort"); },
-        function(){ loadWeather(49.4521, 11.0767, "Nürnberg"); },
-        {enableHighAccuracy:false, timeout:7000, maximumAge:3600000}
+        function(p){loadWeather(p.coords.latitude,p.coords.longitude,"Aktueller Standort");},
+        function(){loadWeather(49.4521,11.0767,"Nürnberg");},
+        {enableHighAccuracy:false,timeout:7000,maximumAge:3600000}
       );
     } else {
-      loadWeather(49.4521, 11.0767, "Nürnberg");
+      loadWeather(49.4521,11.0767,"Nürnberg");
     }
   }
-  initWeather();
-  setInterval(initWeather, 30 * 60 * 1000);
+  weather();
+  setInterval(weather,30*60*1000);
 
-  var frame = document.getElementById("calendarFrame");
-  var empty = document.getElementById("calendarEmpty");
-  var input = document.getElementById("calendarUrl");
-  var status = document.getElementById("status");
+  var calendarUrl="https://calendar.google.com/calendar/embed?src=nsponseil%40gmail.com&ctz=Europe%2FBerlin";
+  var agendaUrl="https://calendar.google.com/calendar/embed?src=nsponseil%40gmail.com&ctz=Europe%2FBerlin&mode=AGENDA";
 
-  function normalizeCalendarUrl(url){
-    url = (url || "").trim();
-    if(url.indexOf("<iframe") !== -1){
-      var match = url.match(/src=["']([^"']+)["']/i);
-      if(match && match[1]) url = match[1];
-    }
-    return url.replace(/&amp;/g,"&");
+  function refreshCalendars() {
+    document.getElementById("calendarFrame").src=calendarUrl;
+    document.getElementById("agendaFrame").src=agendaUrl;
   }
-
-  function agendaUrlFrom(url){
-    if(!url) return "";
-    var base = url;
-    if(base.indexOf("mode=") !== -1){
-      base = base.replace(/([?&])mode=[^&]*/i, "$1mode=AGENDA");
-    } else {
-      base += (base.indexOf("?") === -1 ? "?" : "&") + "mode=AGENDA";
-    }
-    return base;
-  }
-
-  function showCalendar(url){
-    if(!url){
-      frame.removeAttribute("src");
-      empty.style.display="flex";
-      agendaFrame.removeAttribute("src");
-      agendaEmpty.style.display="flex";
-      return;
-    }
-    frame.src = url;
-    empty.style.display="none";
-    agendaFrame.src = agendaUrlFrom(url);
-    agendaEmpty.style.display="none";
-  }
-
-  function refreshGoogleCalendar(){
-    var url = saved;
-    frame.src = url;
-    agendaFrame.src = agendaUrlFrom(url);
-  }
-
-  // Tischdisplay: Google-Kalender alle 5 Minuten automatisch aktualisieren.
-  setInterval(refreshGoogleCalendar, 5 * 60 * 1000);
-
-  var saved = "https://calendar.google.com/calendar/embed?src=nsponseil%40gmail.com\&ctz=Europe%2FBerlin";
-  var setupPanel = document.getElementById("setupPanel");
-  var sidePanel = document.getElementById("sidePanel");
-  var settingsBtn = document.getElementById("settingsBtn");
-  var agendaFrame = document.getElementById("agendaFrame");
-  var agendaEmpty = document.getElementById("agendaEmpty");
-
-  function setConfigured(configured){
-    setupPanel.style.display = "none";
-  }
-
-  if(saved){
-    input.value = saved;
-    showCalendar(saved);
-    setConfigured(true);
-  }
-
-  var settingsOverlay = document.getElementById("settingsOverlay");
-  var overlayInput = document.getElementById("overlayCalendarUrl");
-  var overlayStatus = document.getElementById("overlayStatus");
-  if(saved) overlayInput.value = saved;
-
-  window.openCalendarSettings = function(){
-    var savedUrl = localStorage.getItem("ipadDashboardCalendarUrl") || "";
-    overlayInput.value = savedUrl;
-    settingsOverlay.className = "settingsOverlay open";
-  };
-
-  window.saveCalendarFromOverlay = function(){
-    var url = normalizeCalendarUrl(overlayInput.value);
-    if(url.indexOf("https://calendar.google.com/calendar/embed") !== 0 &&
-       url.indexOf("https://www.google.com/calendar/embed") !== 0){
-      overlayStatus.textContent = "Bitte den vollständigen Google-Kalender-Link einfügen.";
-      return;
-    }
-    try {
-      localStorage.setItem("ipadDashboardCalendarUrl", url);
-    } catch(e) {
-      overlayStatus.textContent = "Safari konnte den Link nicht speichern.";
-      return;
-    }
-    input.value = url;
-    showCalendar(url);
-    overlayStatus.textContent = "Gespeichert ✓";
-    settingsOverlay.className = "settingsOverlay";
-  };
-
-  document.getElementById("saveBtn").addEventListener("click", function(){
-    var url = normalizeCalendarUrl(input.value);
-    if(url.indexOf("https://calendar.google.com/calendar/embed") !== 0 &&
-       url.indexOf("https://www.google.com/calendar/embed") !== 0){
-      status.textContent = "Bitte einen gültigen Google-Kalender-Einbettungslink einfügen.";
-      return;
-    }
-    localStorage.setItem("ipadDashboardCalendarUrl", url);
-    input.value = url;
-    showCalendar(url);
-    status.textContent = "Gespeichert ✓";
-    setConfigured(true);
-  });
+  setInterval(refreshCalendars,5*60*1000);
 })();
 </script>
-
-<div class="settingsOverlay" id="settingsOverlay">
-  <div style="display:flex;justify-content:space-between;align-items:center"><h3>Kalender-Einstellungen</h3><button type="button" onclick="document.getElementById('settingsOverlay').className='settingsOverlay'" style="width:42px;background:#2b303b;color:white">×</button></div>
-  <p>Hier kannst du den gespeicherten Google-Kalender-Link ändern.</p>
-  <input id="overlayCalendarUrl" type="url" placeholder="Google-Kalender-Einbettungslink">
-  <button id="overlaySaveBtn" type="button" onclick="saveCalendarFromOverlay()">Kalender speichern</button>
-  <div class="status" id="overlayStatus">Der Link wird nur lokal auf diesem Gerät gespeichert.</div>
-</div>
-
 </body>
 </html>
